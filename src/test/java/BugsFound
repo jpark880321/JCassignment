@@ -1,0 +1,29 @@
+--Bugs found in Password Hashing Application--
+
+1. POST /hash endpoint does not immediately return a job identifier
+Expected Result: It takes about 5000 ms for a job identifier to be returned
+
+1. POST /hash endpoint allows keys other than "password"
+Expected Result: No other keys other than "password" should be allowed when submitting this request
+
+2. POST /hash endpoint allows empty password value input
+Expected Result: The "password" key should always require a value for submission
+
+3. POST /hash endpoint allows empty json as its input
+Expected Result: Similar to #2, empty json should be be allowed as a parameter
+
+4. Base64 encoded password hash does not match the expected value
+Expected Result: Assuming only the value of the key is used for hashing, the expected encoded hash for "angrymonkey" is "MzRkZDBmMDBhYjYyNzlhY2EyNGQ4ZjNmNDFkZTc3MDFlMzMzMWU0NmVmNjQzNzcwNjE4ODgzOWYwYjQzNzZmZmM1MjE2YmRjY2I1YjBhMDliZWVhOGJiMzZlZjEwZjAyNzdmMzJhOGQwN2IyMDg4ZDI5NThhMGM2YTdiZTAwZDY=" which does not equal to the actual encoded has value of "NN0PAKtieayiTY8/Qd53AeMzHkbvZDdwYYiDnwtDdv/FIWvcy1sKCb7qi7Nu8Q8Cd/MqjQeyCI0pWKDGp74A1g==".
+
+5. GET /stats endpoint allows keys
+Expected Result: This endpoint should not accept any key parameter
+
+6. /stats endpoint accepts non-GET (POST) operation
+Expected Result: This endpoint should only accept GET calls
+
+7. Average Time calculated does not match the expected
+Expected Result: Based on the testGetStats automated test, the expected average time for two POST /hash requests is estimated to be around 5000 ms but the actual was well over 100000 ms.
+
+8. Multi POST /hash requests do not process simultaneously (asynchronously)
+Expected Result: Each request seem to process synchronously with each request taking around 5000 ms (i.e. if there are 3 requests submitted total, all three requests should process simultaneously with each returning a corresponding job identifier).
+

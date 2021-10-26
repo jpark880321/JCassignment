@@ -1,0 +1,184 @@
+--Test Cases for Password Hashing Application--
+
+- Scenario: app execution -
+Precondition: a user has successfully downloaded and extracted the app file
+#test_run_with_correct_port
+    Given
+        the application is attempted to run
+    When
+        the port is set to default 8088
+    Then
+        the application will successfully start and wait for http connections
+
+#test_run_with_incorrect_port
+    Given
+        the application is attempted to run
+    When
+        the port is set to 8080
+    Then
+        the application will fail to start
+
+- Scenario: POST hash endpoint -
+Precondition: the application is running
+#test_correct_password_key
+    Given
+        /hash endpoint with the provided parameter {"password": "<your_password>"}
+    When
+        it is hit with POST method
+    Then
+        it should return a job identifier immediately (assume less than 1 sec) with a 2xx status code
+
+#test_incorrect_password_key
+    Given
+        /hash endpoint with the provided parameter {"notPassword": "<your_password>"}
+    When
+        it is hit with POST method
+    Then
+        the operation should fail and return an error with a non 2xx status code
+
+#test_empty_password_value
+    Given
+        /hash endpoint with the provided parameter {"password": ""}
+    When
+        it is hit with POST method
+    Then
+        the operation should fail and return an error with a non 2xx status code
+
+#test_empty_json
+    Given
+        /hash endpoint with the provided parameter {}
+    When
+        it is hit with POST method
+    Then
+        the operation should fail and return an error with a non 2xx status code
+
+- Scenario: GET hash endpoint -
+Precondition: the application is running and a user has submitted passwords for hashing
+#test_valid_job_identifier
+    Given
+        /hash/<job_identifier> endpoint with a <job_identifier> provided to get the corresponding encoded password hash
+    When
+        it is hit with GET method
+    Then
+       it should return a corresponding base64 encoded password hash and a 2xx status code
+
+#test_nonexistent_job_identifier
+   Given
+       /hash/<job_identifier> endpoint with a non-existent <job_identifier> provided
+   When
+       it is hit with GET method
+   Then
+      the operation should fail and return an error with a non 2xx status code
+
+#test_invalid_job_identifier
+    Given
+        /hash/<job_identifier> endpoint with no <job_identifier> provided
+    When
+        it is hit with GET method
+    Then
+        the operation should fail and return an error with a non 2xx status code
+
+#test_password_encoded_correctly
+    Given
+        a job_identifier for the password value of "angrymonkey"
+    When
+        /hash/<job_identifier> endpoint is hit with GET method for the job identifier
+    Then
+        it should return the base64 encoded password hash value of "MzRkZDBmMDBhYjYyNzlhY2EyNGQ4ZjNmNDFkZTc3MDFlMzMzMWU0NmVmNjQzNzcwNjE4ODgzOWYwYjQzNzZmZmM1MjE2YmRjY2I1YjBhMDliZWVhOGJiMzZlZjEwZjAyNzdmMzJhOGQwN2IyMDg4ZDI5NThhMGM2YTdiZTAwZDY=" and a 2xx status code
+
+- Scenario: GET stats endpoint -
+Precondition: the application is running
+#test_get_stats_with_no_key
+    Given
+        /stats endpoint with no provided parameter key
+    When
+        it is hit with GET method
+    Then
+        it should return a JSON data for the total number of hash requests since server start and the average time of a hash request in milliseconds with a 2xx status code
+
+#test_get_stats_with_key
+    Given
+        /stats endpoint with a randomly provided parameter key
+    When
+        it is hit with GET method
+    Then
+        the operation should fail and return an error with a non 2xx status code
+
+#test_get_stats_as_non_get
+    Given
+        /stats endpoint with no provided parameter key
+    When
+        it is hit with any method other than GET
+    Then
+        he operation should fail and return an error with a non 2xx status code
+
+#test_number_of_hash_requests
+    Given
+        a number of both successful and rejected POST /hash requests made since server start
+    When
+        /stats endpoint is hit with GET
+    Then
+        the returned value for total hash request should match the sum of the given
+
+#test_average_hash_request_time
+    Given
+        a calculated average time took for two successful hash requests
+    When
+        /stats endpoint is hit with GET
+    Then
+        the returned value for average hash request time should match the given
+
+- Scenario: others -
+Precondition: the application is running
+
+#test_multi_connections_post_hash
+    Given
+        the application is running
+    When
+        more than one POST hash request is sent
+    Then
+        it should process all requests asynchronously and return a job identifier for each of the corresponding request
+
+#test_multi_connections_get_hash
+    Given
+        the application is running
+    When
+        more than one GET hash request is sent
+    Then
+        it should process all requests asynchronously and return an encoded password hash for each of the corresponding job identifiers
+
+#test_multi_connections_get_stats
+    Given
+        the application is running
+    When
+        more than one GET stats request is sent
+    Then
+        it should process all requests asynchronously and return JSON stats data for each of the corresponding request
+
+#test_shutdown
+    Given
+        the application is running with no in-flight hashing request
+    When
+        /hash endpoint is hit with POST with "shutdown" as a parameter
+    Then
+        it should exit the application and return a 2xx status code
+
+#test_graceful_shutdown
+    Given
+        the application is running with in-flight hashing requests
+    When
+        /hash endpoint is hit with POST with "shutdown" as a parameter
+    Then
+        it should allow all in-flight requests to complete before exiting the application and return a 2xx status code
+
+#test_new_request_rejection_while_shutdown
+    Given
+        the application is running with in-flight hashing requests and /hash endpoint is hit with POST with "shutdown" as a parameter
+    When
+        new hashing requests are made
+    Then
+        it should reject requests received post-shutdown and return a 2xx status code
+
+- Test Scenarios to consider -
+1. Test for password validations - special characters, password length, and password format requirement
+2. Load testing endpoints with different thresholds for each request

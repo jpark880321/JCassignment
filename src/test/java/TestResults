@@ -1,0 +1,23 @@
+--Test Results for Password Hashing Application--
+
+#test_run_with_correct_port:PASS
+#test_run_with_incorrect_port:PASS
+#test_correct_password_key:PASS
+#test_incorrect_password_key:FAIL
+#test_empty_password_value:FAIL
+#test_empty_json:FAIL
+#test_valid_job_identifier:PASS
+#test_nonexistent_job_identifier:PASS
+#test_invalid_job_identifier:PASS
+#test_password_encoded_correctly:FAIL
+#test_get_stats_with_no_key:PASS
+#test_get_stats_with_key:FAIL
+#test_get_stats_as_non_get:FAIL
+#test_number_of_hash_requests:PASS
+#test_average_hash_request_time:FAIL
+#test_multi_connections_post_hash:FAIL
+#test_multi_connections_get_hash:PASS
+#test_multi_connections_get_stats:PASS
+#test_shutdown:PASS
+#test_graceful_shutdown:PASS
+#test_new_request_rejection_while_shutdown:PASS
